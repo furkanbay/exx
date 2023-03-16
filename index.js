@@ -1,7 +1,7 @@
 import { schedule, params } from "@ampt/sdk";
+import { data } from "@ampt/data";
 // import fetch from "node-fetch";
 import * as cheerio from "cheerio";
-import Airtable from "airtable";
 
 schedule("Bereal History").every("1 minute", async () => {
   console.log("I run every minute!");
@@ -32,53 +32,37 @@ schedule("Bereal History").every("1 minute", async () => {
     .get();
 
   console.log(tableJson);
-  const base = new Airtable({ apiKey: params("AIRTABLE_API_KEY") || "" }).base(
-    params("AIRTABLE_BASE_ID") || ""
-  );
-  const tableId = "bereal_history";
 
-  const oldRecords = await base(tableId).select().all();
+  await data.set("foo", "bar2", {
+    overwrite: true,
+  });
 
-  const deleteRecord = (id) => {
-    return base(tableId).destroy(id, (err) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
-    });
-  };
+  await data.set("Bereal History", tableJson, {
+    overwrite: true,
+  });
 
-  const deleteAllRecords = () => {
-    Promise.all(oldRecords.map((record) => deleteRecord(record.id)));
-  };
+  // const createNewRecord = (row) => {
+  //   const time = row[0];
+  //   const [day, month, year] = time.split("-");
+  //   const date = new Date(`${year}-${month}-${day}`);
+  //   const id = date.getTime();
+  //   const fields = {
+  //     fields: {
+  //       id,
+  //       date,
+  //       americas_ct: row[1],
+  //       east_asia_ist: row[2],
+  //     },
+  //   };
+  //   return data("Bereal History").create(fields);
+  // };
 
-  const createNewRecord = (row) => {
-    const time = row[0];
-    const [day, month, year] = time.split("-");
-    const date = new Date(`${year}-${month}-${day}`);
-    const id = date.getTime();
-    const fields = {
-      fields: {
-        id,
-        date,
-        americas_ct: row[1],
-        east_asia_ist: row[2],
-      },
-    };
-    base(tableId).create([fields], (err) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
-    });
-  };
+  // const createNewRecords = () => {
+  //   Promise.all(tableJson.map((row) => createNewRecord(row)));
+  // };
 
-  const createNewRecords = () => {
-    Promise.all(tableJson.map((row) => createNewRecord(row)));
-  };
+  // deleteAllRecords();
+  // createNewRecords();
 
-  deleteAllRecords();
-  createNewRecords();
-
-  console.log("I run on Tuesdays!");
+  console.log("I rasfasfa");
 });
